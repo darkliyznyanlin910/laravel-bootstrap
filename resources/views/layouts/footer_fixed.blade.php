@@ -12,9 +12,6 @@
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="https://code.iconify.design/2/2.1.2/iconify.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -24,10 +21,20 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="shortcut icon" href="images/gg.png" type="image/x-icon" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .allbutfooter{
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
+    <div id="app" class="allbutfooter">
         <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
@@ -68,10 +75,10 @@
 
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
 
-                                        <a class="dropdown-item" href="summary">Summary</a>
-                                        <a class="dropdown-item" href="pending_orders">Pending Orders</a>
-                                        <a class="dropdown-item" href="order_history">Order History</a>
-                                        <a class="dropdown-item" href="manage_items">Manage Items</a>
+                                        <a class="dropdown-item" href="{{ route('summary') }}">Summary</a>
+                                        <a class="dropdown-item" href="{{ route('pending_orders') }}">Pending Orders</a>
+                                        <a class="dropdown-item" href="{{ route('order_history') }}">Order History</a>
+                                        <a class="dropdown-item" href="{{ route('manage_items') }}">Manage Items</a>
 
                                     </div>
                                 </li>
@@ -80,7 +87,7 @@
                                 <a class="nav-link" href="/"><i class="fa fa-home"></i> Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="cart"><i class="fa fa-shopping-cart"></i> Cart</a>
+                                <a class="nav-link" href="{{ route('cart') }}"><i class="fa fa-shopping-cart"></i> Cart</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -88,7 +95,7 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="profile">{{ __('Profile') }}</a>
+                                    <a class="dropdown-item" href="{{ route('profile') }}">{{ __('Profile') }}</a>
 
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
@@ -112,13 +119,13 @@
         </main>
 
     </div>
-    <footer class="bg-dark text-center text-white fixed-bottom">
+    <footer class="bg-dark text-center text-white sticky-bottom">
         
         <div class="container pt-1">
             
             <section class="mb-1">
                 About this Project : 
-                <a class="btn btn-outline-light btn-floating m-1" href="/about" role="button"><i class="fa fa-info-circle"></i></a>
+                <a class="btn btn-outline-light btn-floating m-1" href="{{ route('about') }}" role="button"><i class="fa fa-info-circle"></i></a>
             </section>
             
         </div>

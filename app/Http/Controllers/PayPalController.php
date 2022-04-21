@@ -85,40 +85,40 @@ class PayPalController extends Controller
 
         if (isset($response['status']) && $response['status'] == 'COMPLETED') {
 
-                $address_unserialized = Session::get('address');
-                $address = serialize($address_unserialized);
-                $order_items = Session::get('cart');
+            $address_unserialized = Session::get('address');
+            $address = serialize($address_unserialized);
+            $order_items = Session::get('cart');
 
-                $total = 0;
-        
-                foreach($order_items as $item){
-                    $item_name = $item['item_name'];
-                    $result = DB::select("select * from items where item_name = '$item_name'");
-                    $price = $result[0]->price;
-                    $stock = $result[0]->stock;
-                    $sale = $item['quantity'];
-                    $left = $stock - $item['quantity'];
-                    DB::update("update items set sale ='$sale' where item_name = '$item_name'");
-                    DB::update("update items set stock ='$left' where item_name = '$item_name'");
-                    $item_total = $item['quantity'] * $price;
-                    $total += $item_total;
-                }
-        
-                $user_email = Auth::user()->email;
-                $order_date = date("Y-m-d");
-                $receive_date = date('Y-m-d', strtotime($order_date . " + 7 day"));
-                $order_status = "Processing";
-        
-                $order_items_serialized = serialize($order_items);
-                $cart_check = 1;
-        
-                if(DB::insert('insert into orders (user_email, order_date, order_items, order_total, address, receive_date, order_status) values (?, ?, ?, ?, ?, ?, ?)', 
-                [$user_email, $order_date, $order_items_serialized, $total, $address, $receive_date, $order_status])){
-                    $cart_check = 0;
-                    Session::forget('cart');
-                    Session::forget('total');
-                    Session::forget('address');
-                }
+            $total = 0;
+    
+            foreach($order_items as $item){
+                $item_name = $item['item_name'];
+                $result = DB::select("select * from items where item_name = '$item_name'");
+                $price = $result[0]->price;
+                $stock = $result[0]->stock;
+                $sale = $item['quantity'];
+                $left = $stock - $item['quantity'];
+                DB::update("update items set sale ='$sale' where item_name = '$item_name'");
+                DB::update("update items set stock ='$left' where item_name = '$item_name'");
+                $item_total = $item['quantity'] * $price;
+                $total += $item_total;
+            }
+    
+            $user_email = Auth::user()->email;
+            $order_date = date("Y-m-d");
+            $receive_date = date('Y-m-d', strtotime($order_date . " + 7 day"));
+            $order_status = "Processing";
+    
+            $order_items_serialized = serialize($order_items);
+            $cart_check = 1;
+    
+            if(DB::insert('insert into orders (user_email, order_date, order_items, order_total, address, receive_date, order_status) values (?, ?, ?, ?, ?, ?, ?)', 
+            [$user_email, $order_date, $order_items_serialized, $total, $address, $receive_date, $order_status])){
+                $cart_check = 0;
+                Session::forget('cart');
+                Session::forget('total');
+                Session::forget('address');
+            }
             return view('thankyou');
         } else {
             return redirect()

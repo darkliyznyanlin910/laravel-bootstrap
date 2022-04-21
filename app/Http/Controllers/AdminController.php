@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\File;
 use App\Models\orders;
 use App\Models\Item;
+use App\Models\category;
 use App\Http\Requests\StorePostRequest;
 
 class AdminController extends Controller
@@ -17,7 +18,8 @@ class AdminController extends Controller
     {
         $today = date('Y-m-d');
         $date = date('Y-m-d', strtotime($today."- 15 days"));
-        $items = DB::select("select * from items order by `sale` desc");
+        //$items = DB::select("select * from items order by `sale` desc");
+        $items = Item::orderBy('sale', 'asc')->get();
         for($i=0; $i<count($items); $i++){
             if($items[$i]->sale == 0 || $items[$i]->visit == 0){
                 $items[$i]->rate = 0;
@@ -30,7 +32,8 @@ class AdminController extends Controller
         
         $sale_total = 0;
         $order_no = 0;
-        $orders_all = DB::select("select order_total from orders");
+        //$orders_all = DB::select("select order_total from orders");
+        $orders_all = Orders::all();
         foreach($orders_all as $order_all){
             $sale_total += $order_all->order_total;
             $order_no++;
@@ -38,7 +41,8 @@ class AdminController extends Controller
 
         $sale_in_15_days = 0;
         $order_no_in_15_days = 0;
-        $orders_15 = DB::select("select order_total from orders where order_date > '$date'");
+        //$orders_15 = DB::select("select order_total from orders where order_date > '$date'");
+        $orders_15 = Orders::where('order_date', '>', $date);
         foreach($orders_15 as $order_15){
             $sale_in_15_days += $order_15->order_total;
             $order_no_in_15_days++;
@@ -49,7 +53,8 @@ class AdminController extends Controller
 
     public function pending_orders()
     {
-        $result = DB::select("select * from orders where order_status != 'Delivered' order by `order_date`");
+        //$result = DB::select("select * from orders where order_status != 'Delivered' order by `order_date`");
+        $result = Orders::whereNot('order_status', 'Delivered')->orderBy('order_date', 'asc')->get();
         return view('pending_orders',['orders'=>$result]);
     }
 
@@ -62,20 +67,23 @@ class AdminController extends Controller
 
     public function add_new_item()
     {
-        $categories = DB::select("select * from categories");
+        //$categories = DB::select("select * from categories");
+        $categories = category::all();
         return view('add_new_item',['categories'=>$categories]);
     }
 
     public function manage_category()
     {
-        $categories = DB::select("select * from categories");
+        //$categories = DB::select("select * from categories");
+        $categories = category::all();
         return view('manage_category',['categories'=>$categories]);
     }
 
     public function add_new_category_process(request $request)
     {
-        $category = $request['category'];
-        $check = DB::select("select * from categories where category_name = '$category'");
+        $category = strip_tags($request['category']);
+        //$check = DB::select("select * from categories where category_name = '$category'");
+        $check = category::where('category_name', $category)->get();
         if(count($check) != 0){
             return redirect()->back()->withError('Category already Exist');
         }
@@ -85,17 +93,19 @@ class AdminController extends Controller
 
     public function remove_category_process(request $request)
     {
-        $category = $request['category'];
+        $category = strip_tags($request['category']);
         DB::delete("delete from categories where category_name = '$category'");
         return redirect()->route('manage_category')->withSuccess('Category Removd');
     }
 
     public function edit_items(request $request)
     {
-        $id = $request['id'];
-        $items = DB::select("select * from items where id = '$id' ");
+        $id = strip_tags($request['id']);
+        //$items = DB::select("select * from items where id = '$id' ");
+        $items = Item::where('id', $id)->get();
         $category = $items[0]->category;
-        $categories = DB::select("select * from categories where category_name != '$category'");
+        //$categories = DB::select("select * from categories where category_name != '$category'");
+        $categories = Category::whereNot('category_name', $category);
         $state = 'active';
         if($items[0]->state == 'active'){
             $state = 'inactive';
@@ -105,21 +115,22 @@ class AdminController extends Controller
 
     public function edit_items_process(Request $request)
     {
-        $id = $request['id'];
-        $sku = $request['sku'];
-        $item_name = $request['item_name'];
-        $price = $request['price'];
-        $stock = $request['stock'];
-        $state = $request['state'];
-        $category = $request['category'];
+        $id = strip_tags($request['id']);
+        $sku = strip_tags($request['sku']);
+        $item_name = strip_tags($request['item_name']);
+        $price = strip_tags($request['price']);
+        $stock = strip_tags($request['stock']);
+        $state = strip_tags($request['state']);
+        $category = strip_tags($request['category']);
 
-        $discount_setting = $request['discount'];
-        $start_date = $request['start_date'];
-        $end_date = $request['end_date'];
+        $discount_setting = strip_tags($request['discount']);
+        $start_date = strip_tags($request['start_date']);
+        $end_date = strip_tags($request['end_date']);
 
         $sku_check = 'single';
         
         $items = DB::select("select sku from items where id != '$id'");
+        $items = Item::whereNot('id', $id);
         foreach($items as $item){
             if($item->sku == $sku){
                 $sku_check = 'duplicate';
@@ -167,25 +178,29 @@ class AdminController extends Controller
 
     public function manage_items()
     {
-        $items = DB::select('select * from items');
+        //$items = DB::select('select * from items');
+        $items = Item::all();
         return view('manage_items',['items'=>$items]);
     }
 
     public function deactivate_items($id)
     {
-        DB::update("update items set state ='inactive' where id = '$id'");
+        $clean_id = strip_tags($id);
+        DB::update("update items set state ='inactive' where id = '$clean_id'");
         return redirect()->back()->withSuccess('Item Removed from Shelves');
     }
 
     public function activate_items($id)
     {
-        DB::update("update items set state ='active' where id = '$id'");
+        $clean_id = strip_tags($id);
+        DB::update("update items set state ='active' where id = '$clean_id'");
         return redirect()->back()->withSuccess('Item Added Back to Shelves');
     }
 
     public function delete_items($id)
     {
-        DB::delete("delete from items where id = '$id'");
+        $clean_id = strip_tags($id);
+        DB::delete("delete from items where id = '$clean_id'");
         return redirect()->back()->withSuccess('Item Deleted');
     }
 
@@ -201,19 +216,20 @@ class AdminController extends Controller
             [$category]);
         }
 
-        $sku = $request['sku'];
+        $sku = strip_tags($request['sku']);
 
-        $sku_check = DB::select("select sku from items where sku = '$sku'");
+        //$sku_check = DB::select("select sku from items where sku = '$sku'");
+        $sku_check = Item::where('sku', $sku);
         if(count($sku_check) != 0){
             return redirect()->back()->withError('Item SKU already Exist');
         }
-        $item_name = $request['item_name'];
+        $item_name = strip_tags($request['item_name']);
 
-        $price = $request['price'];
+        $price = strip_tags($request['price']);
 
-        $stock = $request['stock'];
+        $stock = strip_tags($request['stock']);
 
-        $state = $request['state'];
+        $state = strip_tags($request['state']);
 
         $fileName = time().'.'.$request->file->extension();  
    
@@ -229,8 +245,8 @@ class AdminController extends Controller
 
     public function admin_order_update(Request $request)
     {
-        $order_id = $request['order_id'];
-        $status = $request['status'];
+        $order_id = strip_tags($request['order_id']);
+        $status = strip_tags($request['status']);
         DB::update("update orders set order_status ='$status' where id = '$order_id'");
         
         return redirect()->back()->withSuccess('Status Updated Successfully');
@@ -238,10 +254,10 @@ class AdminController extends Controller
 
     public function stock_update_process(Request $request)
     {
-        $id = $request['id'];
+        $id = strip_tags($request['id']);
         $results = DB::select("select stock from items where id = '$id'");
         $old_stock = $results[0]->stock;
-        $quantity = $request['quantity'];
+        $quantity = strip_tags($request['quantity']);
         $new_stock = $old_stock + $quantity;
         
         DB::update("update items set stock ='$new_stock' where id = '$id'");
@@ -251,10 +267,10 @@ class AdminController extends Controller
 
     public function stock_remove_process(Request $request)
     {
-        $id = $request['id'];
+        $id = strip_tags($request['id']);
         $results = DB::select("select stock from items where id = '$id'");
         $old_stock = $results[0]->stock;
-        $quantity = $request['quantity'];
+        $quantity = strip_tags($request['quantity']);
         $new_stock = $old_stock - $quantity;
         
         DB::update("update items set stock ='$new_stock' where id = '$id'");

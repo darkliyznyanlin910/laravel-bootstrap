@@ -21,9 +21,20 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="shortcut icon" href="images/gg.png" type="image/x-icon" />
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .allbutfooter{
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
+    <div id="app" class="allbutfooter">
         <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">

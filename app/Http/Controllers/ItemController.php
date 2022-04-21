@@ -18,8 +18,9 @@ class ItemController extends Controller
 
     public function search(request $request)
     {
-        $search = $request['search'];
+        $search = strip_tags($request['search']);
         $items = DB::select("select * from items where item_name like '%$search%'");
+        $items = Item::where('item_name','LIKE','%'.$search.'%');
         return view('search',['items'=>$items]);
     }
 }

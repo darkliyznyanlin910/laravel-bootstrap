@@ -10,9 +10,13 @@ class item extends Model
     use HasFactory;
     protected $fillable = [
         'id',
+        'sku',
         'item_name',
         'state',
         'discount',
+        'discount_setting',
+        'start_date',
+        'end_date',
         'category',
         'price',
         'img',

@@ -67,10 +67,10 @@ class SessionController extends Controller
     public function confirm(request $request)
     {
         //Session::forget('cart');
-        $street = $request['street'];
-        $block = $request['block'];
-        $unit = $request['unit'];
-        $postal_code = $request['postal_code'];
+        $street = strip_tags($request['street']);
+        $block = strip_tags($request['block']);
+        $unit = strip_tags($request['unit']);
+        $postal_code = strip_tags($request['postal_code']);
         if(isset($request['street'])){
             Session::put('address', ['street'=>$street, 'block'=>$block, 'unit'=>$unit, 'postal_code'=>$postal_code,]);
         }
@@ -83,11 +83,12 @@ class SessionController extends Controller
 
     public function add(Request $request)
     {
-        $id = $request['id'];
-        $quantity = $request['quantity'];
+        $id = strip_tags($request['id']);
+        $quantity = strip_tags($request['quantity']);
 
         $result = DB::select("select * from items where id = '$id'");
         $img = $result[0]->img;
+        $sku = $result[0]->sku;
         $price = $result[0]->price;
         $stock = $result[0]->stock;
         $item_name = $result[0]->item_name;
@@ -108,10 +109,10 @@ class SessionController extends Controller
                 }
             }
             if($item_new === 1){
-                Session::push('cart', ['id' => $id, 'item_name' => $item_name, 'discount' => $discount, 'quantity' => $quantity, 'img'=> $img, 'stock'=> $stock, 'price'=> $price,]);
+                Session::push('cart', ['id' => $id, 'item_name' => $item_name, 'sku' => $sku, 'discount' => $discount, 'quantity' => $quantity, 'img'=> $img, 'stock'=> $stock, 'price'=> $price,]);
             }
         }else{
-            Session::put('cart', [['id' => $id, 'item_name' => $item_name, 'discount' => $discount, 'quantity' => $quantity, 'img'=> $img, 'stock'=> $stock, 'price'=> $price,]]);
+            Session::put('cart', [['id' => $id, 'item_name' => $item_name, 'sku' => $sku, 'discount' => $discount, 'quantity' => $quantity, 'img'=> $img, 'stock'=> $stock, 'price'=> $price,]]);
         }
 
         return redirect()->back()->withSuccess('Item Added');
@@ -119,8 +120,8 @@ class SessionController extends Controller
 
     public function remove(Request $remove)
     {
-        $id = $remove['id'];
-        $quantity = $remove['quantity'];
+        $id = strip_tags($remove['id']);
+        $quantity = strip_tags($remove['quantity']);
         if(Session::has('cart')){
             $items = Session::get('cart');
             for($i=0; $i < count($items); $i++){
