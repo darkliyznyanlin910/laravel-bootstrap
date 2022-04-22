@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
-use PDF;
 use App\Models\orders;
 
 class PDFController extends Controller
@@ -13,8 +12,8 @@ class PDFController extends Controller
     {
         $order_id = strip_tags($request['order_id']);
 
-        $order = DB::select("select * from orders where id = '$order_id'");
-        $order = orders::where('id', $order_id);
+        //$order = DB::select("select * from orders where id = '$order_id'");
+        $order = orders::where('id', $order_id)->get();
 
         $email = $order[0]->user_email;
         $userdetails = DB::select("SELECT * FROM `users` WHERE email = '$email'");
