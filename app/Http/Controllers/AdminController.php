@@ -54,7 +54,7 @@ class AdminController extends Controller
     public function pending_orders()
     {
         //$result = DB::select("select * from orders where order_status != 'Delivered' order by `order_date`");
-        $result = Orders::whereNot('order_status', 'Delivered')->orderBy('order_date', 'asc')->get();
+        $result = Orders::whereIn('order_status', ['Processing', 'Out for Delivery'])->orderBy('order_date', 'asc')->get();
         return view('pending_orders',['orders'=>$result]);
     }
 
